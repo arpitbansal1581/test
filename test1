@@ -1,0 +1,22 @@
+from azure.core.credentials import AzureKeyCredential
+from azure.ai.documentintelligence import DocumentIntelligenceClient, BuildDocumentModelRequest
+
+endpoint = "https://<your-resource-name>.cognitiveservices.azure.com"
+key = "<your-form-recognizer-key>"
+
+client = DocumentIntelligenceClient(endpoint, AzureKeyCredential(key))
+
+build_request = BuildDocumentModelRequest(
+    model_id="custom-model-sas",
+    build_mode="template",
+    azure_blob_source={
+        "container_url": "https://<storage>.blob.core.windows.net/<container>?<sas-token>"
+    },
+    description="Trained with SAS URL"
+)
+
+poller = client.begin_build_document_model(build_request)
+model = poller.result()
+
+print(f"Model ID: {model.model_id}")
+print(f"Status: {model.api_version}, Created on: {model.created_date_time}")
