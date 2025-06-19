@@ -1,25 +1,25 @@
-from azure.ai.documentintelligence import DocumentModelAdministrationClient, AzureBlobContentSource
-from azure.core.credentials import AzureKeyCredential
+import re
 
-# Replace these values with your actual info
-endpoint = "https://<your-resource-name>.cognitiveservices.azure.com"
-key = "<your-form-recognizer-key>"
-sas_url = "https://<your-storage>.blob.core.windows.net/<container>?<sas-token>"
+def extract_invoice_fields(text: str):
+    fields = {}
 
-# Create the admin client
-client = DocumentModelAdministrationClient(endpoint=endpoint, credential=AzureKeyCredential(key))
+    # Example: Invoice Number
+    match = re.search(r"Invoice\s*Number[:\s]*([A-Z0-9\-]+)", text, re.IGNORECASE)
+    if match:
+        fields["InvoiceNumber"] = match.group(1)
 
-# Start training the model
-poller = client.begin_build_document_model(
-    model_id="my-custom-model",
-    build_mode="template",
-    azure_blob_source=AzureBlobContentSource(container_url=sas_url),
-    description="Model trained with SAS URL"
-)
+    # Example: Invoice Date
+    match = re.search(r"Invoice\s*Date[:\s]*([\d/\-]+)", text, re.IGNORECASE)
+    if match:
+        fields["InvoiceDate"] = match.group(1)
 
-# Wait for training to complete
-model = poller.result()
+    # Example: Total Amount
+    match = re.search(r"Total\s*Amount[:\s]*\$?([\d,]+\.\d{2})", text, re.IGNORECASE)
+    if match:
+        fields["TotalAmount"] = match.group(1)
 
-# Print result
-print(f"Model ID: {model.model_id}")
-print(f"Status: {model.api_version}, Created on: {model.created_date_time}")
+    return fields
+
+# Apply extraction
+fields = extract_invoice_fields(all_text)
+print(fields)
