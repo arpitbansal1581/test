@@ -1,33 +1,66 @@
-from azure.ai.documentintelligence import DocumentIntelligenceClient
-from azure.core.credentials import AzureKeyCredential
+| Stage                             | Description                                                               | Agentic Role                                |
+| --------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------- |
+| 1. Ingestion                      | Real-time feed intake from Thomson Reuters (e.g. Regulatory Intelligence) | **Feed Ingestion Agent**                    |
+| 2. Risk Rating                    | Determine Materiality & Magnitude (M\&M) of regulatory change             | **Risk Assessment Agent**                   |
+| 3. Triage                         | Regulatory Change Manager reviews high-risk items                         | **Triage Agent + Human in the Loop (HITL)** |
+| 4. Impact Assessment              | Officers assess process, policy, control, and system impact               | **Impact Analysis Agent**                   |
+| 5. Change Ownership & Action Plan | Assign task owners, timelines, resource plan                              | **Change Assignment Agent**                 |
+| 6. Implementation Monitoring      | Track implementation milestones and updates                               | **Execution Tracker Agent**                 |
+| 7. Regulatory Feedback            | Update regulator or internal audit systems post-change                    | **Regulator Communication Agent**           |
 
-# Azure setup
-endpoint = "https://<your-resource>.cognitiveservices.azure.com"
-key = "<your-key>"
 
-client = DocumentIntelligenceClient(endpoint=endpoint, credential=AzureKeyCredential(key))
++-------------------+
+| Regulatory Feeds  | <-- from Thomson Reuters, LexisNexis, etc.
++-------------------+
+          |
+          v
++-----------------------+
+| Feed Ingestion Agent  | --> Extracts entity, date, geography, law
++-----------------------+
+          |
+          v
++------------------------+
+| Risk Assessment Agent  | --> LLM + rules engine does initial M&M tagging
++------------------------+
+          |
+          v
++------------------------+
+| Triage Agent           | --> Escalates high-risk to human change manager
++------------------------+
+          |
+          v
++-------------------------+
+| Impact Analysis Agent   | --> Gathers process/IT/policy impact areas
+| + Retrieve ISDA clauses |
++-------------------------+
+          |
+          v
++------------------------+
+| Change Assignment Agent| --> Assigns change to departments or owners
++------------------------+
+          |
+          v
++--------------------------+
+| Execution Tracker Agent  | --> Reminds, updates, verifies milestones
++--------------------------+
+          |
+          v
++----------------------------+
+| Regulator Communication Agent | --> Drafts notifications or disclosures
++----------------------------+
 
-# Load document
-with open("your-file.pdf", "rb") as f:
-    file_bytes = f.read()
 
-# Use plain string queries directly
-poller = client.begin_analyze_document(
-    model_id="prebuilt-layout",
-    features=["query"],
-    body={
-        "base64Source": file_bytes,
-        "queryFields": [
-            {"query": "What is the invoice number?"},
-            {"query": "What is the invoice date?"},
-            {"query": "What is the total amount?"}
-        ]
-    }
-)
 
-result = poller.result()
 
-# Print extracted query fields
-for doc in result.documents:
-    for field_name, field in doc.fields.items():
-        print(f"{field_name}: {field.content} (Confidence: {field.confidence:.2f})")
+| Manual Task                                                | Agentic Process                                   | LLM Value                                     |
+| ---------------------------------------------------------- | ------------------------------------------------- | --------------------------------------------- |
+| Manually parsing PDFs of regulations                       | Feed Agent + PDF OCR + LLM summarization          | Extracts core change in simple form           |
+| Risk tagging based on subjective judgment                  | Risk Agent with training data                     | Consistent rating based on context            |
+| Searching for applicable clauses (e.g. in ISDA agreements) | Retrieval-Augmented Generation (RAG) + Embeddings | Finds relevant contract clauses automatically |
+| Email or memo drafting to teams/regulators                 | LLM auto-drafted updates, editable                | 90% draft-ready content                       |
+| Tracking tasks via Excel                                   | Execution Agent integrates with Jira, Teams       | Proactive updates and escalation              |
+| Regulatory mapping to policies or systems                  | Impact Agent trained on policy-doc embedding      | Suggests impact surface                       |
+
+
+
+
