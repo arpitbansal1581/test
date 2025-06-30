@@ -1,25 +1,25 @@
-import re
+from azure.ai.documentintelligence import DocumentIntelligenceClient
+from azure.core.credentials import AzureKeyCredential
 
-def extract_invoice_fields(text: str):
-    fields = {}
+# Replace with your values
+endpoint = "https://<your-resource-name>.cognitiveservices.azure.com"
+api_key = "<your-api-key>"
+model_id = "<your-custom-model-id>"
+document_path = "sample.pdf"  # or .jpg, .png, .tiff
 
-    # Example: Invoice Number
-    match = re.search(r"Invoice\s*Number[:\s]*([A-Z0-9\-]+)", text, re.IGNORECASE)
-    if match:
-        fields["InvoiceNumber"] = match.group(1)
+# Initialize client
+client = DocumentIntelligenceClient(endpoint=endpoint, credential=AzureKeyCredential(api_key))
 
-    # Example: Invoice Date
-    match = re.search(r"Invoice\s*Date[:\s]*([\d/\-]+)", text, re.IGNORECASE)
-    if match:
-        fields["InvoiceDate"] = match.group(1)
+# Open the document file
+with open(document_path, "rb") as f:
+    poller = client.begin_analyze_document(model_id=model_id, document=f)
+    result = poller.result()
 
-    # Example: Total Amount
-    match = re.search(r"Total\s*Amount[:\s]*\$?([\d,]+\.\d{2})", text, re.IGNORECASE)
-    if match:
-        fields["TotalAmount"] = match.group(1)
-
-    return fields
-
-# Apply extraction
-fields = extract_invoice_fields(all_text)
-print(fields)
+# Print all extracted fields
+for doc in result.documents:
+    print(f"\nDocument Type: {doc.doc_type}")
+    print("Extracted Fields:")
+    for field_name, field in doc.fields.items():
+        content = field.content if field.content else "N/A"
+        confidence = f"{field.confidence * 100:.1f}%" if field.confidence else "Unknown"
+        print(f" - {field_name}: {content} (Confidence: {confidence})")
