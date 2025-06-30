@@ -1,27 +1,38 @@
-from azure.ai.documentintelligence import DocumentIntelligenceClient, AnalyzeDocumentRequest
+from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.core.credentials import AzureKeyCredential
+from azure.ai.documentintelligence.models import AnalyzeDocumentRequest, DocumentQuery
 
-# Replace with your values
+# Replace with your Azure info
 endpoint = "https://<your-resource>.cognitiveservices.azure.com"
-api_key = "<your-key>"
-model_id = "<your-custom-model-id>"
+key = "<your-key>"
 
-client = DocumentIntelligenceClient(endpoint=endpoint, credential=AzureKeyCredential(api_key))
+client = DocumentIntelligenceClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
+# Prepare document
 with open("your-file.pdf", "rb") as f:
-    request = AnalyzeDocumentRequest(base64_source=f.read())  # wraps the file data
+    file_bytes = f.read()
 
-    poller = client.begin_analyze_document(
-        model_id=model_id,
-        body=request  # MUST be passed as 'body'
-    )
+# Define your query fields
+queries = [
+    DocumentQuery(query="What is the invoice number?"),
+    DocumentQuery(query="What is the total amount?"),
+    DocumentQuery(query="What is the invoice date?")
+]
 
-    result = poller.result()
+# Call the prebuilt-layout model with queries
+poller = client.begin_analyze_document(
+    model_id="prebuilt-layout",
+    features=["query"],
+    body={
+        "base64Source": file_bytes,
+        "queryFields": queries
+    }
+)
 
-# Print fields
+result = poller.result()
+
+# Print query results
+print("🔍 Query Results:")
 for doc in result.documents:
-    print(f"\nDocument Type: {doc.doc_type}")
-    for field_name, field in doc.fields.items():
-        value = field.content
-        confidence = field.confidence
-        print(f"{field_name}: {value} (Confidence: {confidence:.2f})")
+    for field in doc.fields.values():
+        print(f"{field.bounding_regions[0].page_number}: {field.content} (confidence: {field.confidence:.2f})")
