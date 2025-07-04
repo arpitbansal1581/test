@@ -1,68 +1,92 @@
-pip install fastapi uvicorn pandas matplotlib openpyxl
+pip install pandas plotly fastapi uvicorn streamlit openpyxl
 
 
-from fastapi import FastAPI, Response
-from fastapi.responses import FileResponse
+chart_utils
 import pandas as pd
-import matplotlib.pyplot as plt
-import os
+import plotly.express as px
 
-app = FastAPI()
-DATA_FILE = "data.xlsx"
-REGION_CHART = "region_chart.png"
-DIVISION_CHART = "division_chart.png"
+def load_data(file_path="data.xlsx"):
+    return pd.read_excel(file_path)
 
-def generate_charts():
-    if not os.path.exists(DATA_FILE):
-        raise FileNotFoundError(f"{DATA_FILE} not found")
+def generate_region_bar_chart(df):
+    region_counts = df.groupby("region")["regid"].count().reset_index()
+    fig = px.bar(region_counts, x="region", y="regid", color="region",
+                 title="RegID Count per Region", text="regid")
+    return fig
 
-    df = pd.read_excel(DATA_FILE)
+def generate_division_bar_chart(df):
+    division_counts = df.groupby("division")["regid"].count().reset_index()
+    fig = px.bar(division_counts, x="division", y="regid", color="division",
+                 title="RegID Count per Division", text="regid")
+    return fig
 
-    # Region-wise count
-    region_counts = df.groupby('region')['regid'].count().reset_index()
-    region_counts.columns = ['Region', 'RegID Count']
+def generate_priority_pie_chart(df):
+    priority_counts = df['priority'].value_counts().reset_index()
+    priority_counts.columns = ['priority', 'count']
+    fig = px.pie(priority_counts, names="priority", values="count", hole=0.4,
+                 title="RegID Distribution by Priority")
+    return fig
 
-    plt.figure(figsize=(8, 5))
-    plt.bar(region_counts['Region'], region_counts['RegID Count'], color='skyblue')
-    plt.title('RegID Count per Region')
-    plt.xlabel('Region')
-    plt.ylabel('Count')
-    plt.grid(True, axis='y', linestyle='--', alpha=0.7)
-    plt.tight_layout()
-    plt.savefig(REGION_CHART)
-    plt.close()
+def generate_division_histogram(df):
+    fig = px.histogram(df, x="division", color="division",
+                       title="Histogram of RegIDs by Division")
+    return fig
 
-    # Division-wise count
-    division_counts = df.groupby('division')['regid'].count().reset_index()
-    division_counts.columns = ['Division', 'RegID Count']
 
-    plt.figure(figsize=(8, 5))
-    plt.bar(division_counts['Division'], division_counts['RegID Count'], color='lightgreen')
-    plt.title('RegID Count per Division')
-    plt.xlabel('Division')
-    plt.ylabel('Count')
-    plt.grid(True, axis='y', linestyle='--', alpha=0.7)
-    plt.tight_layout()
-    plt.savefig(DIVISION_CHART)
-    plt.close()
 
-@app.on_event("startup")
-def startup_event():
-    # Generate charts on startup
-    generate_charts()
 
-@app.get("/")
-def root():
-    return {"message": "Welcome to the RegID Chart API"}
+app.py 
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from chart_utils import load_data, generate_region_bar_chart, generate_division_bar_chart, generate_priority_pie_chart, generate_division_histogram
 
-@app.get("/chart/region")
-def get_region_chart():
-    if os.path.exists(REGION_CHART):
-        return FileResponse(REGION_CHART, media_type="image/png")
-    return Response(content="Region chart not found", status_code=404)
+app = FastAPI(title="Interactive Chart API")
 
-@app.get("/chart/division")
-def get_division_chart():
-    if os.path.exists(DIVISION_CHART):
-        return FileResponse(DIVISION_CHART, media_type="image/png")
-    return Response(content="Division chart not found", status_code=404)
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return "<h2>✅ API is Live. Use /chart/{type} to view charts (region/division/pie/histogram)</h2>"
+
+@app.get("/chart/{chart_type}", response_class=HTMLResponse)
+async def get_chart(chart_type: str):
+    df = load_data()
+    fig = None
+
+    if chart_type == "region":
+        fig = generate_region_bar_chart(df)
+    elif chart_type == "division":
+        fig = generate_division_bar_chart(df)
+    elif chart_type == "pie":
+        fig = generate_priority_pie_chart(df)
+    elif chart_type == "histogram":
+        fig = generate_division_histogram(df)
+    else:
+        return HTMLResponse(content=f"<h3>❌ Unknown chart type: {chart_type}</h3>", status_code=400)
+
+    return fig.to_html(full_html=False, include_plotlyjs='cdn')
+
+
+
+dahsboard.py 
+import streamlit as st
+from chart_utils import load_data, generate_region_bar_chart, generate_division_bar_chart, generate_priority_pie_chart, generate_division_histogram
+
+st.set_page_config(layout="wide", page_title="📊 RegID Charts")
+
+df = load_data()
+st.title("📊 Interactive RegID Dashboard")
+
+chart_type = st.selectbox("Choose a chart type", ["Region Bar", "Division Bar", "Priority Pie", "Division Histogram"])
+
+if chart_type == "Region Bar":
+    fig = generate_region_bar_chart(df)
+elif chart_type == "Division Bar":
+    fig = generate_division_bar_chart(df)
+elif chart_type == "Priority Pie":
+    fig = generate_priority_pie_chart(df)
+elif chart_type == "Division Histogram":
+    fig = generate_division_histogram(df)
+
+st.plotly_chart(fig, use_container_width=True)
+
+with st.expander("📄 View Raw Data"):
+    st.dataframe(df)
