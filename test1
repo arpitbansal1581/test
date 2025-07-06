@@ -95,20 +95,41 @@ with st.expander("📄 View Raw Data"):
 
 
 gantt
+ap.py
+streamlit run app.py
+
+import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Example data
-df = pd.DataFrame({
-    "Task": ["Design", "Development", "Testing"],
-    "Start": ["2024-07-01", "2024-07-11", "2024-07-26"],
-    "End": ["2024-07-10", "2024-07-25", "2024-08-05"],
-    "Resource": ["UI Team", "Dev Team", "QA Team"]
-})
+# Set page settings
+st.set_page_config(page_title="Gantt Chart", layout="wide")
+st.title("📊 Gantt Chart Viewer")
 
-df["Start"] = pd.to_datetime(df["Start"])
-df["End"] = pd.to_datetime(df["End"])
+# File path (local)
+EXCEL_FILE_PATH = "project_timeline.xlsx"  # <- Change to your file name/path
 
-fig = px.timeline(df, x_start="Start", x_end="End", y="Task", color="Resource")
-fig.update_yaxes(autorange="reversed")
-fig.show()
+try:
+    # Load data
+    df = pd.read_excel(EXCEL_FILE_PATH)
+
+    # Convert date columns
+    df["StartDate"] = pd.to_datetime(df["StartDate"])
+    df["EndDate"] = pd.to_datetime(df["EndDate"])
+
+    # Optional filter by Owner
+    if "Owner" in df.columns:
+        owners = st.multiselect("Filter by Owner", options=df["Owner"].unique(), default=df["Owner"].unique())
+        df = df[df["Owner"].isin(owners)]
+
+    # Create Gantt chart
+    fig = px.timeline(df, x_start="StartDate", x_end="EndDate", y="Task", color="Owner" if "Owner" in df.columns else None,
+                      title="Project Timeline Gantt Chart")
+    fig.update_yaxes(autorange="reversed")  # Tasks top to bottom
+
+    # Show chart
+    st.plotly_chart(fig, use_container_width=True)
+
+except Exception as e:
+    st.error(f"Failed to load Gantt chart: {e}")
+
