@@ -90,3 +90,25 @@ st.plotly_chart(fig, use_container_width=True)
 
 with st.expander("📄 View Raw Data"):
     st.dataframe(df)
+
+
+
+
+gantt
+import pandas as pd
+import plotly.express as px
+
+# Example data
+df = pd.DataFrame({
+    "Task": ["Design", "Development", "Testing"],
+    "Start": ["2024-07-01", "2024-07-11", "2024-07-26"],
+    "End": ["2024-07-10", "2024-07-25", "2024-08-05"],
+    "Resource": ["UI Team", "Dev Team", "QA Team"]
+})
+
+df["Start"] = pd.to_datetime(df["Start"])
+df["End"] = pd.to_datetime(df["End"])
+
+fig = px.timeline(df, x_start="Start", x_end="End", y="Task", color="Resource")
+fig.update_yaxes(autorange="reversed")
+fig.show()
