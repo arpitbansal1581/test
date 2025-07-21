@@ -1,0 +1,179 @@
+To **enforce and organize layered agentic design** in your codebase for document extraction (e.g., Ingestion → Extraction → Validation → Output), you need a **structured architectural pattern** that aligns with the concept of **layers and agents**.
+
+Here's how you can implement **layered modularity** in your repo effectively:
+
+---
+
+## ✅ 1. **Layered Directory Structure in Codebase**
+
+Structure your code like a pipeline where each layer is a **module or package**, and each agent is a **component or class** inside that layer.
+
+```
+doc_extraction_system/
+│
+├── ingestion/
+│   ├── email_agent.py
+│   ├── sftp_agent.py
+│   ├── api_agent.py
+│   └── portal_agent.py
+│
+├── preprocessing/
+│   ├── format_detector_agent.py
+│   ├── deglossary_agent.py
+│   ├── image_cleaning_agent.py
+│   └── pdf_splitter_agent.py
+│
+├── extraction/
+│   ├── ocr_agent.py
+│   ├── kv_extractor_agent.py
+│   ├── table_extractor_agent.py
+│   ├── checkbox_agent.py
+│   └── semantic_agent.py
+│
+├── validation/
+│   ├── field_validator_agent.py
+│   ├── rule_engine_agent.py
+│   └── document_consistency_agent.py
+│
+├── feedback/
+│   ├── manual_review_agent.py
+│   ├── feedback_collector.py
+│   └── retraining_interface.py
+│
+├── output/
+│   ├── crm_uploader_agent.py
+│   ├── docvault_writer_agent.py
+│   └── audit_logger_agent.py
+│
+├── core/
+│   ├── pipeline_engine.py
+│   ├── agent_base.py
+│   └── config.py
+│
+└── main.py
+```
+
+---
+
+## ✅ 2. **Enforce Agent and Layer Interfaces**
+
+Use **abstract base classes** for agents, so all agents follow a consistent interface:
+
+### `core/agent_base.py`
+
+```python
+from abc import ABC, abstractmethod
+
+class BaseAgent(ABC):
+    @abstractmethod
+    def run(self, doc_context: dict) -> dict:
+        pass
+```
+
+Each agent inherits this and implements `run()`.
+
+---
+
+## ✅ 3. **Define Layer Workflow Dynamically**
+
+Use a **central orchestrator** (e.g., `pipeline_engine.py`) that enforces **layered execution**.
+
+```python
+from ingestion.email_agent import EmailAgent
+from extraction.ocr_agent import OCRAgent
+from output.crm_uploader_agent import CRMUploader
+
+LAYERS = [
+    ("ingestion", [EmailAgent()]),
+    ("extraction", [OCRAgent()]),
+    ("output", [CRMUploader()])
+]
+
+def run_pipeline(doc_context: dict):
+    for layer_name, agents in LAYERS:
+        for agent in agents:
+            doc_context = agent.run(doc_context)
+    return doc_context
+```
+
+---
+
+## ✅ 4. **Add Configurable Flow per Doc Type**
+
+Use a **YAML or JSON config** to define flows per document type.
+
+### `configs/flows.yaml`
+
+```yaml
+bank_statement:
+  layers:
+    ingestion: [email_agent]
+    preprocessing: [format_detector_agent, image_cleaning_agent]
+    extraction: [ocr_agent, table_extractor_agent]
+    validation: [field_validator_agent]
+    output: [crm_uploader_agent]
+```
+
+Then in your pipeline engine, load these dynamically.
+
+---
+
+## ✅ 5. **Use Dependency Injection for Flexibility**
+
+To allow testing and modularity:
+
+* Use **factories** to load agents
+* Enable pluggable config-driven logic
+
+---
+
+## ✅ 6. **Tagging Agents by Capability**
+
+Inside each agent class, define metadata for orchestration, logging, monitoring.
+
+```python
+class OCRAgent(BaseAgent):
+    name = "ocr_agent"
+    layer = "extraction"
+    capabilities = ["ocr", "text_extraction"]
+```
+
+---
+
+## ✅ 7. **Logging & Audit per Layer**
+
+Wrap each layer with logging:
+
+```python
+for layer_name, agents in LAYERS:
+    logger.info(f"Starting layer: {layer_name}")
+    for agent in agents:
+        logger.info(f"Running agent: {agent.name}")
+        doc_context = agent.run(doc_context)
+        logger.info(f"Finished agent: {agent.name}")
+```
+
+---
+
+## ✅ Bonus: Visualization & Flow Enforcement
+
+If needed:
+
+* Use [LangGraph](https://github.com/langchain-ai/langgraph) or \[FastAPI + D3.js] to visualize the pipeline
+* Create a layer DAG using [Airflow](https://airflow.apache.org/) for orchestration
+
+---
+
+### Summary
+
+| Component            | Responsibility                                       |
+| -------------------- | ---------------------------------------------------- |
+| **Layers (dirs)**    | Segregate concern: ingestion, extraction, validation |
+| **Agents (classes)** | Perform specific tasks in each layer                 |
+| **Orchestrator**     | Executes agents layer-by-layer                       |
+| **Configs**          | Define dynamic flows based on doc type               |
+| **BaseAgent**        | Enforces standard run() method                       |
+
+---
+
+Would you like a sample GitHub-ready repo scaffold or starter code zip for this setup?
