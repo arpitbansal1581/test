@@ -177,3 +177,18 @@ If needed:
 ---
 
 Would you like a sample GitHub-ready repo scaffold or starter code zip for this setup?
+
+dynamically load agents pipeline_config
+# pipeline_config.yaml
+layers:
+  - ingestion:
+      - EmailAgent
+      - SFTPAgent
+  - preprocessing:
+      - RemoveAppendixAgent
+  - extraction:
+      - OCRAgent
+      - KeyValueAgent
+  - output:
+      - CRMUploader
+
