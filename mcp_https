@@ -1,0 +1,108 @@
+Got it! You want a **minimal MCP server in Python** that exposes a tool over **HTTPS** without any authentication. Here’s a simple working example using **FastAPI + Uvicorn + MCPServer**:
+
+---
+
+### 1️⃣ Install Dependencies
+
+```bash
+pip install fastapi uvicorn pydantic
+```
+
+*(We don’t need extra auth libraries since you want no authentication.)*
+
+---
+
+### 2️⃣ Generate Self-Signed SSL Certificates (for testing)
+
+```bash
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+```
+
+This creates:
+
+* `key.pem` → Private key
+* `cert.pem` → Certificate
+
+---
+
+### 3️⃣ Minimal MCP Server Code (`mcp_server.py`)
+
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+import uvicorn
+
+# -------------------------------
+# MCP-style Tool Definition
+# -------------------------------
+
+app = FastAPI(title="Simple MCP Server")
+
+class AddRequest(BaseModel):
+    a: float
+    b: float
+
+class AddResponse(BaseModel):
+    result: float
+
+@app.post("/tool/add", response_model=AddResponse)
+async def add_tool(req: AddRequest):
+    """Simple tool to add two numbers"""
+    return AddResponse(result=req.a + req.b)
+
+# -------------------------------
+# Run server with HTTPS
+# -------------------------------
+if __name__ == "__main__":
+    uvicorn.run(
+        "mcp_server:app",
+        host="0.0.0.0",
+        port=8443,
+        ssl_keyfile="key.pem",
+        ssl_certfile="cert.pem",
+    )
+```
+
+---
+
+### 4️⃣ Run the Server
+
+```bash
+python mcp_server.py
+```
+
+* The server will now be accessible at:
+  **`https://localhost:8443/tool/add`**
+
+---
+
+### 5️⃣ Test Using `curl`
+
+```bash
+curl -k -X POST https://localhost:8443/tool/add \
+  -H "Content-Type: application/json" \
+  -d '{"a": 10, "b": 5}'
+```
+
+**Output:**
+
+```json
+{"result":15}
+```
+
+> Note: `-k` ignores SSL verification since this is self-signed.
+
+---
+
+✅ **Summary**
+
+* Minimal Python MCP-style server
+* HTTPS enabled
+* No authentication
+* Easy to extend: just add more tools as endpoints
+
+---
+
+If you want, I can also **extend this example to be a true MCP tool server** where tools can be **discovered and called dynamically**, still running on HTTPS with no auth. This will be closer to a production-ready MCP setup.
+
+Do you want me to do that?
