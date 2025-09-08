@@ -106,3 +106,15 @@ curl -k -X POST https://localhost:8443/tool/add \
 If you want, I can also **extend this example to be a true MCP tool server** where tools can be **discovered and called dynamically**, still running on HTTPS with no auth. This will be closer to a production-ready MCP setup.
 
 Do you want me to do that?
+
+
+tools list 
+curl -X POST http://localhost:8000 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list",
+    "params": {}
+  }'
+
