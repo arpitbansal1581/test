@@ -118,3 +118,7 @@ curl -X POST http://localhost:8000 \
     "params": {}
   }'
 
+
+stdio mode 
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | python server.py --transport stdio
+
