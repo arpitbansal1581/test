@@ -120,5 +120,8 @@ curl -X POST http://localhost:8000 \
 
 
 stdio mode 
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | python server.py --transport stdio
+tools = await session.list_tools()
+        print("Available tools:")
+        for tool in tools.tools:
+            print(f"- {tool.name}: {tool.description}")
 
