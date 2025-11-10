@@ -1,0 +1,19 @@
+Approach A — Direct Text Extraction (OCR/Text → LLM)
+
+You extract text using OCR or native PDF text extractors (like pdfminer, PyMuPDF, Azure Form Recognizer, etc.) and feed the text directly to the LLM for structured extraction.
+
+Approach B — Multi-Modal Hybrid (OCR → HTML + Page Images → LLM)
+
+You convert OCR output into HTML-like structure (with layout, tables, tags, coordinates, fonts) and also pass page-level images (or image snippets) alongside, allowing the LLM to "see" layout, structure, and visual cues.
+
+| Aspect                                                    | Approach A: Direct Text Extraction                                                     | Approach B: HTML + Images                                                        |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Layout Awareness**                                      | ❌ Lost – LLM only sees linearized text; tables, columns, and positioning are flattened | ✅ Preserved – HTML retains spatial structure; images preserve visual cues        |
+| **Accuracy on Complex Layouts (tables, forms, invoices)** | ⚠️ Often poor – hard for LLM to reconstruct table/column structure                     | ✅ Much better – visual + structured hints help identify tables, signatures, etc. |
+| **Processing Cost**                                       | ✅ Lower – text only                                                                    | ⚠️ Higher – images + HTML increase token and multimodal inference cost           |
+| **Latency**                                               | ✅ Fast                                                                                 | ⚠️ Slower (especially if many pages/images)                                      |
+| **Traceability / Explainability**                         | ⚠️ Harder – text positions lost                                                        | ✅ Easier – you can map extracted entities back to coordinates in HTML/image      |
+| **LLM Context Limit**                                     | ⚠️ Risky – long text may overflow context window                                       | ✅ HTML can be chunked semantically by sections/pages                             |
+| **Visual Elements (charts, logos, stamps)**               | ❌ Ignored completely                                                                   | ✅ Can be recognized or described if needed                                       |
+| **Scalability**                                           | ✅ Easier to scale for pure text documents                                              | ⚠️ Heavier pipelines (OCR + HTML generation + image handling)                    |
+| **Use Cases Best Fit**                                    | Contracts, narrative text documents                                                    | Invoices, forms, financial statements, scanned PDFs, mixed-format docs           |
