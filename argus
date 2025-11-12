@@ -1,106 +1,104 @@
-Here’s a **professionally written Architecture Decision Record (ADR)** version of the above analysis — formatted in standard ADR structure (Context, Decision, Rationale, Consequences) and tailored to your platform team’s standards for technical governance and architectural documentation.
+h1. ADR-023: Evaluation of Azure Project ARGUS for Document Data Retrieval and Contextual Understanding
 
----
+*Date:* 12 Nov 2025  
+*Status:* *Proposed*  
+*Owner:* Platform Architecture & AI Enablement Team  
+*Related ADRs:* ADR-012 (Document Intelligence Integration), ADR-018 (LLM-based Reasoning for Document Understanding), ADR-021 (Traceability & Evaluation Framework)
 
-# **ADR-023: Evaluation of Azure Project ARGUS for Document Data Retrieval and Contextual Understanding**
+----
 
-**Date:** 2025-11-12
-**Status:** Proposed
-**Owner:** Platform Architecture & AI Enablement Team
-**Related ADRs:** ADR-012 (Document Intelligence Integration), ADR-018 (LLM-based Reasoning for Document Understanding), ADR-021 (Traceability & Evaluation Framework)
+h2. 1. Context
 
----
+The platform currently leverages *Azure Document Intelligence* for OCR and structured data extraction, and *Azure OpenAI* models for reasoning and summarization.
 
-## **Context**
+While this provides baseline document processing capabilities, the current setup lacks:
 
-The platform currently leverages **Azure Document Intelligence** for OCR and structured data extraction and **Azure OpenAI** models for reasoning and summarization.
-While this architecture provides baseline document processing capabilities, it lacks:
+* Deep contextual understanding across document sections (e.g., relationships between clauses, tables, and metadata)
+* Unified framework for evaluation, schema management, and dataset-specific extraction logic
+* Scalable integration between layout extraction and semantic reasoning layers
 
-* Deep contextual understanding across document elements (e.g., relationships between clauses, tables, and metadata).
-* A unified framework for evaluation, prompt schema management, and dataset-specific extraction logic.
-* Scalable integration between layout extraction and semantic reasoning layers.
+Microsoft’s open-source project *[ARGUS|https://github.com/Azure-Samples/ARGUS]* claims to enhance contextual data retrieval and comprehension by combining Document Intelligence with LLM-based reasoning, configurable datasets, and evaluation modules.
 
-Microsoft’s open-source initiative **[ARGUS](https://github.com/Azure-Samples/ARGUS)** claims to improve contextual data retrieval and comprehension by combining Document Intelligence with LLM-based reasoning, configurable datasets, and evaluation modules.
-This ADR evaluates whether adopting ARGUS (partially or fully) provides measurable benefits for our **document understanding and retrieval pipeline**.
+This ADR evaluates whether adopting ARGUS (partially or fully) provides measurable benefits for the *Document Understanding and Retrieval Pipeline.*
 
----
+----
 
-## **Decision**
+h2. 2. Decision
 
-We will **partially adopt the ARGUS architectural pattern** — integrating its hybrid pipeline concept and dataset configuration structure — while maintaining our existing document extraction and LLM orchestration frameworks.
+We will *partially adopt the ARGUS architectural pattern* — integrating its hybrid pipeline concept and dataset configuration structure — while retaining our existing orchestration and observability frameworks.
 
-Specifically:
+*Adopt:*
+# Hybrid extraction + reasoning pipeline (Document Intelligence + LLM reasoning)
+# Dataset abstraction for configurable prompts, schemas, and evaluation logic
+# Evaluation framework for semantic and fuzzy string similarity validation
 
-1. **Adopt**
+*Not Adopt:*
+# Direct use of ARGUS source code in production (due to limited enterprise support)
+# Its orchestration layer (we will use LangGraph-based internal controller)
+# Its storage and deployment model (outputs will integrate into Azure Cognitive Search and observability stack)
 
-   * ARGUS’s **hybrid extraction + reasoning pipeline** (Document Intelligence + LLM reasoning).
-   * The **dataset abstraction** for configurable prompts, schemas, and evaluation logic.
-   * The **evaluation framework** for semantic and fuzzy string similarity validation.
+----
 
-2. **Not Adopt**
+h2. 3. Rationale
 
-   * Direct usage of ARGUS source code for production workloads (due to limited enterprise support and extensibility constraints).
-   * Its orchestration layer; instead, use our internal agentic workflow controller (LangGraph-based) for modular reasoning and observability.
-   * Its storage and deployment model; integrate outputs directly into our existing Azure Cognitive Search and observability stack.
+|| Capability Area || Baseline (Doc Intelligence + LLM) || ARGUS Approach || Improvement ||
+| *Extraction Accuracy* | Accurate for structured fields only | Combines layout parsing with reasoning | Better relational accuracy (linking totals, clauses, entities) |
+| *Contextual Understanding* | Limited to prompt design | Context-aware extraction and reasoning | Stronger semantic linking between document sections |
+| *Adaptability to Document Types* | Manual tuning per type | Dataset-based configuration (zero-shot) | Easier scaling across document domains |
+| *Evaluation & Traceability* | Manual validation | Semantic and fuzzy-match evaluation | Quantifiable quality metrics |
+| *Operational Scalability* | Script-driven | Cloud-native, event-driven | Compatible with Service Bus architecture |
+| *Governance / Auditability* | Basic metadata logs | Schema-based lineage with source traceability | Supports regulatory audit needs |
 
----
+ARGUS’s hybrid design enables richer contextual understanding by reasoning over structured outputs rather than plain text, offering *domain-specific, traceable, and evaluatable document intelligence*.
 
-## **Rationale**
+This aligns with our objectives for *traceability, adaptive learning, and agentic human-in-the-loop review.*
 
-| **Capability Area**                | **Baseline (Doc Intelligence + LLM)** | **ARGUS Approach**                            | **Improvement**                                                        |
-| ---------------------------------- | ------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------- |
-| **Extraction Accuracy**            | High for structured fields only       | Combines layout parsing with reasoning        | Improved relational accuracy (e.g., linking totals, clauses, entities) |
-| **Contextual Understanding**       | Limited to prompt quality             | Context-aware extraction and reasoning        | Stronger semantic linking between document sections                    |
-| **Adaptability to Document Types** | Requires prompt tuning                | Dataset-based configuration (zero-shot)       | Lower maintenance; easier scaling across domains                       |
-| **Evaluation & Traceability**      | Manual validation                     | Built-in semantic and fuzzy match evaluation  | Quantifiable quality metrics                                           |
-| **Operational Scalability**        | Custom scripts per pipeline           | Cloud-native, event-driven model              | Aligns with current Service Bus event framework                        |
-| **Governance / Auditability**      | Basic metadata logging                | Schema-based lineage with source traceability | Supports regulatory and audit trail requirements                       |
+----
 
-ARGUS’s hybrid design enables richer context understanding by reasoning over structured outputs, rather than raw text, allowing for domain-specific, traceable, and evaluatable document intelligence.
-For our platform, this approach aligns with goals around **traceability, adaptive learning, and agentic human-in-the-loop review**.
+h2. 4. Consequences
 
----
+h3. Positive Impacts
+* Improved data retrieval precision and contextual accuracy
+* Domain-specific and configurable extraction via datasets
+* Stronger traceability: extracted values linked to document sources
+* Built-in evaluation and quality metrics for ongoing monitoring
+* Compatible with agentic workflow orchestration (LangGraph, Service Bus)
 
-## **Consequences**
+h3. Negative Impacts / Risks
+* Increased computational cost (OCR + LLM reasoning stages)
+* Prompt and schema governance overhead (versioning required)
+* ARGUS maturity risk – open-source reference, not production framework
+* Integration complexity with current observability and vector search layers
 
-### **Positive Impacts**
+----
 
-* **Improved data retrieval precision:** Context-aware extraction yields higher semantic accuracy.
-* **Configurable and domain-specific:** Dataset abstraction supports different document categories (e.g., contracts, regulations, statements).
-* **Enhanced traceability:** Ability to link extracted values to original document sources (page/section).
-* **Quality monitoring:** Integrated evaluation module supports continuous accuracy measurement.
-* **Alignment with agentic design:** Works synergistically with LangGraph and feedback loops.
+h2. 5. Decision Outcome
 
-### **Negative Impacts / Risks**
+*Status:* ✅ *Approved for Pilot Integration*
 
-* **Increased computational cost:** Dual-stage processing (OCR + LLM reasoning) increases latency and Azure consumption.
-* **Prompt governance overhead:** Multiple datasets require version control and approval workflows.
-* **Code maturity:** ARGUS remains an open-source sample, not a production-ready framework.
-* **Integration complexity:** Requires adaptation to existing observability, monitoring, and vector indexing systems.
+The *Data Retrieval and Intelligence layer* will incorporate an ARGUS-inspired hybrid model.  
+A proof-of-concept will benchmark:
 
----
+* Extraction accuracy vs baseline (Precision, Recall, F1)
+* Contextual Q&A response quality (semantic similarity)
+* Processing throughput and Azure cost metrics
 
-## **Decision Outcome**
+Pilot outcomes will determine final adoption into the production blueprint for *Regulatory, Contractual, and Financial Document Pipelines.*
 
-✅ **Approved for pilot integration** within the **Data Retrieval and Intelligence layer**.
-A proof-of-concept will be implemented to benchmark:
+----
 
-* Extraction accuracy vs. baseline (precision, recall, F1)
-* Contextual Q&A quality (semantic similarity scoring)
-* Processing throughput and cost metrics
+h2. 6. Next Steps
 
-Based on pilot results, ARGUS’s design will inform the **final production blueprint** for contextual document understanding across regulatory, contractual, and financial document pipelines.
+# Deploy controlled pilot with 200 sample documents
+# Compare retrieval metrics vs. current baseline
+# Define governance standards for dataset schema management
+# Integrate evaluation results into Observability Dashboard
+# Submit final Implementation ADR post-pilot
 
----
+----
 
-## **Next Steps**
+h2. 7. References
 
-1. Deploy a controlled ARGUS-inspired pipeline for 200 sample documents.
-2. Compare retrieval metrics against current Doc Intelligence + OpenAI baseline.
-3. Document governance standards for dataset schema management.
-4. Integrate evaluation outputs into the central observability dashboard.
-5. Submit final implementation ADR following pilot outcome.
-
----
-
-Would you like me to create a **companion technical architecture diagram (C4 Level-2 or Level-3)** showing where ARGUS fits in your existing document processing and agentic workflow stack? That would make this ADR complete for architecture board review.
+* [Azure Project ARGUS GitHub Repository|https://github.com/Azure-Samples/ARGUS]
+* [Azure Document Intelligence|https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview]
+* [Azure OpenAI Service|https://learn.microsoft.com/en-us/azure/ai-services/o]()*
