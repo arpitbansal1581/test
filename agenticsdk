@@ -1,0 +1,110 @@
+h1. 🧠 Architecture Decision Record (ADR) — Custom Agentic SDK Development
+
+---
+
+*ADR ID:* ADR-2025-AG-SDK-001  
+*Title:* Build and Adopt a Custom Agentic SDK for Intelligent Agent Development  
+*Status:* Approved  
+*Date:* 12-Nov-2025  
+*Author:* Platform Architecture Team  
+
+---
+
+h2. 1. Context and Problem Statement
+
+Our organization’s *Intelligent Automation and LLM Orchestration Framework (IB-Agentic Platform)* requires a unified, governable, and auditable SDK to build, manage, and evolve intelligent agents across regulatory, document processing, and decision-support workflows.
+
+Current open-source and commercial SDKs — such as *LangGraph*, *OpenAI Agent SDK*, and various *vendor-provided orchestration frameworks* — offer useful abstractions for reasoning, state management, and tool invocation.  
+However, *none of them fully satisfy our enterprise-level IB requirements*, including:
+
+* Regulatory and audit traceability across agent reasoning and action logs  
+* Secure integration with internal A2A communication and Azure Service Bus  
+* Tenant-aware multi-agent coordination with isolation and observability  
+* Dynamic compliance-driven routing and human-in-loop workflows  
+* Adaptive reinforcement and continuous improvement framework (beyond simple tool usage)  
+* Seamless integration with our internal governance, telemetry, and compliance layers  
+
+Hence, a *custom Agentic SDK* is required — one that incorporates the best concepts from LangGraph, OpenAI Agent SDK, and other available frameworks, while ensuring our IB architecture, security, and compliance requirements are fully met.
+
+---
+
+h2. 2. Decision Drivers
+
+# Governance & Traceability — every agent action, state transition, and tool invocation must be traceable and reviewable.  
+# Observability — native support for logs, metrics, traces, and evaluation feedback loops.  
+# Security & Isolation — agents must operate within controlled sandboxes and communicate only through approved channels (e.g., Azure Service Bus, A2A connectors).  
+# Extensibility — ability to integrate new reasoning models, tools, and task planners dynamically.  
+# Compliance Alignment — must comply with regulatory reporting and audit standards.  
+# Interoperability — should leverage best patterns from existing SDKs (LangGraph, OpenAI SDK, Semantic Kernel, etc.) while removing their limitations.
+
+---
+
+h2. 3. Considered Alternatives
+
+|| *Option* || *Description* || *Pros* || *Cons* ||
+| *LangGraph* | Open-source agentic workflow framework with stateful reasoning graphs. | Visual graph structure, strong community, composable nodes. | Limited enterprise control, lacks native audit and governance support. |
+| *OpenAI Agent SDK* | SDK for structured tool invocation and LLM-based function calling. | Well-integrated with OpenAI ecosystem, clean design. | Closed ecosystem, lacks enterprise-level extensibility and observability. |
+| *Proprietary Vendor SDKs* | Various private offerings from SaaS/LLM providers. | Supported and production-tested. | Lack transparency, vendor lock-in, no deep customization for IB use cases. |
+| *Custom In-House Agentic SDK* | Build an SDK leveraging best features from above while aligning with IB architecture. | Full control, tailored observability, and compliance. | Requires development and maintenance effort. |
+
+---
+
+h2. 4. Decision
+
+We will *develop a custom Agentic SDK* that:
+
+* Adopts *graph-based reasoning and orchestration patterns* from LangGraph  
+* Integrates *structured tool invocation* and *contextual memory management* from OpenAI SDK  
+* Embeds *IB-native security, compliance, and traceability modules*  
+* Exposes *standardized APIs* for agent registration, task routing, and feedback ingestion  
+* Supports *plug-and-play connectors* for Azure Cognitive Search, Document Intelligence, and Cognitive Services  
+* Enables *continuous evaluation and adaptive learning loops*
+
+The SDK will serve as a *core framework* in our agentic ecosystem, powering *domain-specific agents* for regulatory change management, document data extraction, and enterprise compliance workflows.
+
+---
+
+h2. 5. Consequences
+
+*Positive Outcomes:*
+* Full compliance with IB governance standards  
+* Centralized observability, audit, and evaluation control  
+* Extensible architecture for multi-agent collaboration  
+* Reduced vendor dependency  
+* Reusable building blocks for agent creation and deployment  
+
+*Negative Outcomes:*
+* Increased development and maintenance effort  
+* Initial slower rollout compared to ready-made SDKs  
+* Continuous need for architectural alignment with evolving LLM technologies  
+
+---
+
+h2. 6. Implementation Notes
+
+*Core Components:*
+* *Agent Lifecycle Manager* — registration, state management  
+* *Reasoning Graph Engine* — task orchestration, adaptive planning  
+* *Tool Invocation Layer* — A2A connectors, system tools, external APIs  
+* *Observation & Reinforcement Module* — evaluation, learning loops  
+* *Governance & Telemetry Layer* — traceability, compliance logging  
+
+*Technology Stack:*
+* Python (LangGraph-inspired orchestration)  
+* Azure Service Bus for agent communication  
+* Azure Monitor + LangFuse for observability  
+* OpenAI + Azure Cognitive Services for reasoning and perception layers  
+
+*Future Enhancements:*
+* Multi-modal tool adapters (Vision, Speech, PDF Intelligence)  
+* Self-improving agent memory and fine-tuning integration  
+* Federated agent collaboration across business domains  
+
+---
+
+h2. 7. References
+
+* [LangGraph Documentation|https://github.com/langchain-ai/langgraph]  
+* [OpenAI Agent SDK|https://platform.openai.com/docs/assistants/overview]  
+* [Azure Service Bus Architecture Guidelines|https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview]  
+* [Internal IB Agentic Platform Design Document|/architecture/agentic-platform-design]
