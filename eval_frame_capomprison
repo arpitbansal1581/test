@@ -1,0 +1,585 @@
+# Comprehensive Evaluation Frameworks Comparison Guide
+
+Let me create a detailed comparison table and guidelines for all major open-source evaluation frameworks.
+
+## 📊 Complete Comparison Table
+
+| Framework | License | Best For | Key Strengths | Limitations | Agent Support | Tool Calling | RAG | Multi-Agent | LLM-as-Judge | Cost Tracking |
+|-----------|---------|----------|---------------|-------------|---------------|--------------|-----|-------------|--------------|---------------|
+| **DeepEval** | Apache 2.0 | RAG, QA, Summarization | Pre-built metrics, Easy setup, G-Eval | Limited multi-agent, Basic tool tracking | ⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| **RAGAS** | Apache 2.0 | RAG Systems | RAG-specific metrics, Ground truth free | Only RAG, No agent support | ⭐ | ⭐ | ⭐⭐⭐⭐⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐ |
+| **LangSmith** | Proprietary (Free tier) | Full LLM Apps, Tracing | End-to-end tracing, Dataset management | Not fully open-source, Costs | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **W&B Weave** | Apache 2.0 | Experiment Tracking, Agent Monitoring | Beautiful UI, Version control, Collaboration | Learning curve, Setup complexity | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **AgentOps** | MIT | Agent Observability | Agent-specific, Session tracking, Low overhead | Young project, Limited metrics | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ |
+| **PromptFlow** | MIT | Prompt Engineering, Flows | Flow visualization, Azure integration | Microsoft ecosystem focus | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
+| **LangFuse** | MIT | Tracing, Analytics | Open-source alternative to LangSmith | Smaller community | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **Phoenix (Arize)** | Apache 2.0 | Observability, Embeddings | Embedding analysis, Drift detection | Complex setup | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
+| **TruLens** | MIT | Feedback Functions, RAG | Custom evaluators, Detailed feedback | Performance overhead | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
+| **Patronus AI** | Proprietary (API) | Enterprise Evals | High quality, Comprehensive | Not open-source, Expensive | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| **OpenAI Evals** | MIT | Custom Benchmarks | Simple, Flexible | Basic, DIY approach | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐ |
+| **Inspect AI** | Apache 2.0 | Security, Safety | Security focus, Model inspection | Narrow scope | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
+
+**Rating Scale**: ⭐ (Poor/Not Supported) to ⭐⭐⭐⭐⭐ (Excellent)
+
+---
+
+## 🎯 Detailed Framework Breakdown
+
+### 1. **DeepEval** 
+**License**: Apache 2.0 (Fully Open Source)
+
+**Best Use Cases**:
+- ✅ RAG system evaluation (answer relevancy, faithfulness, context relevance)
+- ✅ Summarization quality assessment
+- ✅ Question-answering systems
+- ✅ LLM response quality (G-Eval, bias detection, toxicity)
+- ✅ Quick prototyping and testing
+
+**What It's Good At**:
+- 14+ pre-built metrics out of the box
+- G-Eval implementation (LLM-as-judge)
+- Easy integration (3-4 lines of code)
+- Built-in hallucination detection
+- Supports custom metrics
+- Pytest integration for CI/CD
+
+**What It's NOT Good At**:
+- ❌ Multi-agent coordination evaluation
+- ❌ Complex tool-calling workflows
+- ❌ Agent reasoning chain analysis
+- ❌ Real-time monitoring/production observability
+
+**Key Metrics Available**:
+```
+RAG: Answer Relevancy, Faithfulness, Contextual Relevancy, 
+     Contextual Precision, Contextual Recall
+Quality: G-Eval, Summarization, Bias, Toxicity
+Accuracy: Exact Match, BLEU, ROUGE
+```
+
+**Example Code**:
+```python
+from deepeval.metrics import AnswerRelevancyMetric, FaithfulnessMetric
+from deepeval.test_case import LLMTestCase
+
+test_case = LLMTestCase(
+    input="What is the capital of France?",
+    actual_output="Paris is the capital of France",
+    retrieval_context=["France is a country", "Paris is the capital"]
+)
+
+metric = FaithfulnessMetric(threshold=0.7)
+metric.measure(test_case)
+print(metric.score)  # 0.95
+```
+
+**When to Choose DeepEval**:
+- Your primary use case is RAG
+- You need quick evaluation setup
+- You want pre-built metrics
+- You're building QA or summarization systems
+- You need G-Eval for quality assessment
+
+---
+
+### 2. **RAGAS** 
+**License**: Apache 2.0 (Fully Open Source)
+
+**Best Use Cases**:
+- ✅ RAG pipeline evaluation (THE best for this)
+- ✅ Retrieval quality assessment
+- ✅ Generation quality in RAG
+- ✅ Reference-free evaluation
+
+**What It's Good At**:
+- Specialized RAG metrics (faithfulness, answer relevancy, context precision/recall)
+- Works without ground truth (reference-free)
+- Automatic test data generation
+- Integration with LangChain, LlamaIndex
+- Component-level RAG evaluation
+
+**What It's NOT Good At**:
+- ❌ Non-RAG applications
+- ❌ Agent evaluation
+- ❌ Tool calling assessment
+- ❌ Multi-agent systems
+- ❌ Production monitoring
+
+**Key Metrics Available**:
+```
+Retrieval: Context Precision, Context Recall, Context Relevancy
+Generation: Faithfulness, Answer Relevancy, Answer Correctness
+End-to-End: Answer Semantic Similarity
+```
+
+**Example Code**:
+```python
+from ragas import evaluate
+from ragas.metrics import faithfulness, answer_relevancy
+
+result = evaluate(
+    dataset=your_dataset,
+    metrics=[faithfulness, answer_relevancy]
+)
+print(result)
+```
+
+**When to Choose RAGAS**:
+- You're building a RAG system (period)
+- You need component-level RAG evaluation
+- You don't have ground truth answers
+- You want to evaluate retrieval separately from generation
+
+---
+
+### 3. **LangSmith** 
+**License**: Proprietary (Free tier available, not fully open-source)
+
+**Best Use Cases**:
+- ✅ End-to-end LLM application tracing
+- ✅ Production monitoring
+- ✅ Dataset management and versioning
+- ✅ Complex agent workflows
+- ✅ Tool calling evaluation
+- ✅ Multi-turn conversations
+
+**What It's Good At**:
+- Complete request tracing (inputs, outputs, intermediate steps)
+- Beautiful UI for debugging
+- Dataset curation and annotation
+- A/B testing and comparisons
+- Human feedback collection
+- Integration with LangChain (obviously)
+- Prompt versioning
+
+**What It's NOT Good At**:
+- ❌ Fully open-source (vendor lock-in risk)
+- ❌ Can get expensive at scale
+- ❌ RAG-specific metrics (use with DeepEval/RAGAS)
+
+**Key Features**:
+```
+- Tracing: Full execution traces
+- Datasets: Curated test sets
+- Evaluators: Custom + LLM-as-judge
+- Annotations: Human feedback
+- Monitoring: Production metrics
+```
+
+**Example Code**:
+```python
+from langsmith import Client
+from langchain.smith import RunEvalConfig
+
+client = Client()
+
+eval_config = RunEvalConfig(
+    evaluators=["qa", "context_qa", "cot_qa"],
+    custom_evaluators=[my_custom_evaluator]
+)
+
+client.run_on_dataset(
+    dataset_name="my_test_set",
+    llm_or_chain_factory=my_chain,
+    evaluation=eval_config
+)
+```
+
+**When to Choose LangSmith**:
+- You're using LangChain
+- You need production monitoring
+- You want end-to-end tracing
+- You need team collaboration features
+- Budget allows for paid tiers
+
+---
+
+### 4. **W&B Weave** 
+**License**: Apache 2.0 (Open Source)
+
+**Best Use Cases**:
+- ✅ Experiment tracking and comparison
+- ✅ Agent execution monitoring
+- ✅ Tool calling analysis
+- ✅ Cost and latency tracking
+- ✅ Model versioning
+- ✅ Team collaboration
+
+**What It's Good At**:
+- Beautiful dashboards and visualizations
+- Extensive logging and tracking
+- Version control for models and datasets
+- Comparing multiple runs side-by-side
+- Integration with ML ecosystem (PyTorch, TensorFlow, etc.)
+- Artifact management
+- Sweep/hyperparameter optimization
+
+**What It's NOT Good At**:
+- ❌ Pre-built LLM-specific metrics (need custom)
+- ❌ RAG-specific evaluations (combine with RAGAS)
+- ❌ Steep learning curve for beginners
+
+**Key Features**:
+```
+- Tracking: Metrics, artifacts, system resources
+- Visualization: Custom charts, tables, media
+- Collaboration: Team workspaces, reports
+- Versioning: Models, datasets, code
+```
+
+**Example Code**:
+```python
+import wandb
+import weave
+
+weave.init('my-project')
+
+@weave.op()
+def my_agent(input: str) -> str:
+    # Agent logic with tool calls
+    result = call_llm(input)
+    return result
+
+# Automatically tracked
+result = my_agent("Hello")
+
+# Manual logging
+wandb.log({
+    "accuracy": 0.95,
+    "latency": 1.2,
+    "cost": 0.003
+})
+```
+
+**When to Choose W&B**:
+- You need experiment tracking
+- You want beautiful dashboards
+- You're tracking multiple metrics (cost, latency, quality)
+- You need team collaboration
+- You want to compare agent versions
+
+---
+
+### 5. **AgentOps** 
+**License**: MIT (Fully Open Source)
+
+**Best Use Cases**:
+- ✅ Agent-specific observability
+- ✅ Session-based tracking
+- ✅ Tool calling monitoring
+- ✅ Agent action logging
+- ✅ LLM call tracking
+
+**What It's Good At**:
+- Purpose-built for agents
+- Lightweight integration (decorator-based)
+- Session tracking (multi-turn conversations)
+- Action and tool call logging
+- Cost per session
+- Time-to-first-token tracking
+- Minimal performance overhead
+
+**What It's NOT Good At**:
+- ❌ Limited evaluation metrics
+- ❌ RAG-specific features
+- ❌ Young project (smaller community)
+- ❌ Limited visualization features
+
+**Key Features**:
+```
+- Session Tracking: Multi-turn conversations
+- Action Logging: Every agent action
+- Tool Monitoring: Tool call success/failure
+- LLM Tracking: All LLM calls
+- Cost Analysis: Per session, per action
+```
+
+**Example Code**:
+```python
+import agentops
+
+agentops.init(api_key="your_key")
+
+@agentops.track_agent()
+class MyAgent:
+    def run(self, task):
+        # Automatically tracked
+        result = self.llm.invoke(task)
+        tool_result = self.tool.execute()
+        return result
+
+agent = MyAgent()
+agent.run("Analyze this data")
+agentops.end_session("Success")
+```
+
+**When to Choose AgentOps**:
+- You're building autonomous agents
+- You need session-based tracking
+- You want lightweight observability
+- You need tool calling insights
+- Cost and latency tracking per session is important
+
+---
+
+### 6. **LangFuse** 
+**License**: MIT (Fully Open Source)
+
+**Best Use Cases**:
+- ✅ Open-source alternative to LangSmith
+- ✅ Production tracing and analytics
+- ✅ Cost tracking
+- ✅ User feedback collection
+- ✅ Self-hosted observability
+
+**What It's Good At**:
+- Fully open-source and self-hostable
+- LangChain and LlamaIndex integration
+- Cost and token tracking
+- User feedback and annotations
+- Prompt management
+- Dataset creation from production traces
+
+**What It's NOT Good At**:
+- ❌ Smaller community than LangSmith
+- ❌ Fewer integrations
+- ❌ UI not as polished
+
+**Key Features**:
+```
+- Tracing: Full execution traces
+- Analytics: Usage, cost, latency
+- Prompts: Version management
+- Datasets: From production data
+- Scores: Custom scoring
+```
+
+**Example Code**:
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+trace = langfuse.trace(name="agent_run")
+span = trace.span(name="llm_call")
+
+# Your agent code
+result = llm.invoke(prompt)
+
+span.end(output=result)
+trace.end()
+```
+
+**When to Choose LangFuse**:
+- You want open-source observability
+- You need self-hosting capability
+- You're avoiding vendor lock-in
+- You need cost tracking
+- You want LangSmith-like features for free
+
+---
+
+### 7. **TruLens** 
+**License**: MIT (Fully Open Source)
+
+**Best Use Cases**:
+- ✅ RAG evaluation with custom feedback
+- ✅ Chain-of-thought analysis
+- ✅ Retrieval quality assessment
+- ✅ LLM app debugging
+
+**What It's Good At**:
+- Custom feedback functions
+- Detailed component evaluation
+- Groundedness and relevance tracking
+- Integration with major frameworks
+- Feedback aggregation
+
+**What It's NOT Good At**:
+- ❌ Performance overhead
+- ❌ Complex setup
+- ❌ Limited multi-agent support
+
+**Key Features**:
+```
+- Feedback: Custom evaluation functions
+- Instrumentation: Auto-logging
+- Metrics: Groundedness, relevance, coherence
+- Guardrails: Safety checks
+```
+
+**Example Code**:
+```python
+from trulens_eval import TruChain, Feedback, Tru
+
+# Define feedback
+f_relevance = Feedback(provider.relevance).on_input_output()
+
+# Wrap your chain
+tru_chain = TruChain(
+    my_chain,
+    app_id="my_app",
+    feedbacks=[f_relevance]
+)
+
+# Run with tracking
+result = tru_chain(input_text)
+```
+
+**When to Choose TruLens**:
+- You need custom evaluation logic
+- You're building RAG systems
+- You want detailed component feedback
+- You need groundedness tracking
+
+---
+
+### 8. **Phoenix (Arize AI)** 
+**License**: Apache 2.0 (Fully Open Source)
+
+**Best Use Cases**:
+- ✅ Embedding analysis
+- ✅ Data drift detection
+- ✅ RAG troubleshooting
+- ✅ Production monitoring
+
+**What It's Good At**:
+- Embedding space visualization
+- Cluster analysis for retrievals
+- Drift and anomaly detection
+- Span-based tracing
+- LlamaIndex integration
+
+**What It's NOT Good At**:
+- ❌ Complex initial setup
+- ❌ Requires ML knowledge
+- ❌ Limited agent-specific features
+
+**When to Choose Phoenix**:
+- You need embedding analysis
+- You're monitoring RAG in production
+- You want drift detection
+- You're using LlamaIndex
+
+---
+
+## 🎯 **Decision Matrix: Which Framework to Use When**
+
+### **Scenario 1: Building a RAG System**
+**Primary**: RAGAS (for RAG metrics)  
+**Secondary**: DeepEval (for additional quality metrics)  
+**Monitoring**: LangFuse or Phoenix  
+
+```python
+# Evaluation stack
+from ragas import evaluate
+from deepeval.metrics import GEval
+
+# RAGAS for RAG-specific
+ragas_result = evaluate(dataset, [faithfulness, context_precision])
+
+# DeepEval for quality
+quality_metric = GEval(criteria="Is the answer helpful?")
+```
+
+---
+
+### **Scenario 2: Building Multi-Agent Systems**
+**Primary**: AgentOps (for agent observability)  
+**Secondary**: W&B Weave (for experiment tracking)  
+**Optional**: LangSmith (if using LangChain)  
+
+```python
+# Stack
+import agentops
+import weave
+
+agentops.init()
+weave.init('multi-agent-project')
+
+@agentops.track_agent()
+@weave.op()
+def coordinator_agent():
+    # Your multi-agent logic
+    pass
+```
+
+---
+
+### **Scenario 3: Tool-Calling Agents**
+**Primary**: LangSmith or LangFuse (for tracing)  
+**Secondary**: AgentOps (for action tracking)  
+**Metrics**: Custom evaluators with W&B  
+
+---
+
+### **Scenario 4: Production LLM Application**
+**Primary**: LangFuse (self-hosted) or LangSmith (cloud)  
+**Secondary**: W&B (for A/B tests)  
+**Quality**: DeepEval for periodic evaluation  
+
+---
+
+### **Scenario 5: Research/Experimentation**
+**Primary**: W&B Weave  
+**Secondary**: DeepEval  
+**Benchmarking**: OpenAI Evals  
+
+---
+
+## 📋 **Recommended Combinations by Use Case**
+
+| Use Case | Primary Framework | Secondary | Monitoring | Metrics |
+|----------|------------------|-----------|------------|---------|
+| **Simple RAG** | RAGAS | DeepEval | LangFuse | Faithfulness, Relevancy |
+| **Complex RAG** | RAGAS + TruLens | Phoenix | LangFuse | All RAG + Embeddings |
+| **Single Agent** | AgentOps | DeepEval | LangFuse | Task Success, Quality |
+| **Multi-Agent** | AgentOps + W&B | LangSmith | W&B Weave | Coordination, Tool Usage |
+| **Chatbot** | DeepEval | LangFuse | LangFuse | Response Quality, Latency |
+| **Code Generation** | Custom + W&B | OpenAI Evals | W&B | Code Correctness, Tests |
+| **Tool-Heavy Agent** | LangSmith | AgentOps | LangFuse | Tool Success, Reasoning |
+| **Production App** | LangFuse | W&B | LangFuse | Cost, Latency, Quality |
+
+---
+
+## 🛠️ **Practical Implementation Strategy**
+
+### **Phase 1: Development (Choose 2)**
+1. **DeepEval** - Quick quality checks
+2. **RAGAS** - If RAG system
+3. **W&B** - Experiment tracking
+
+### **Phase 2: Testing (Choose 2-3)**
+1. Keep Phase 1 tools
+2. Add **LangSmith/LangFuse** - Full tracing
+3. Add **AgentOps** - If agent-based
+
+### **Phase 3: Production (Choose 2-3)**
+1. **LangFuse** - Observability (self-hosted)
+2. **W&B** - A/B testing and monitoring
+3. **DeepEval** - Periodic quality checks
+
+---
+
+## 💡 **Final Recommendations for Developers**
+
+### **For Open-Source Only:**
+```
+RAG: RAGAS + DeepEval + LangFuse
+Agents: AgentOps + W&B Weave + LangFuse
+General: DeepEval + W&B + LangFuse
+```
+
+### **For Best Features (Mix):**
+```
+RAG: RAGAS + DeepEval + Phoenix
+Agents: LangSmith + AgentOps + W&B
+General: LangSmith + DeepEval + W&B
+```
+
+### **For Budget-Conscious:**
+```
+All: DeepEval + LangFuse + (W&B free tier)
+```
+
+This should give your developers clear guidelines on which tools to use for their specific use cases!
